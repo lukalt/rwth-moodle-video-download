@@ -1,0 +1,22 @@
+{
+  "appName": {
+    "message": "RWTHmoodle Video Download",
+    "description": "The title of the application, displayed in the web store."
+  },
+  "appDesc": {
+    "message": "Download lecture and exercise videos directly from RWTHmoodle to your local device.",
+    "description":"The description of the application, displayed in the web store."
+  },
+  "downloadButton": {
+	"message": "Download",
+	"description": "Description of the download button"
+  },
+  "downloadError": {
+	"message": "Could not load downloads for this video.",
+	"description": "Error message shown when an error occurs"
+  },
+  "noDownloads": {
+	"message": "No download is available for this video.",
+	"description": "Error message shown when no download is available"
+  }
+}

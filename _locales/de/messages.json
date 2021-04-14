@@ -1,0 +1,17 @@
+{
+  "appName": {
+    "message": "RWTHmoodle Video Download"
+  },
+  "appDesc": {
+    "message": "Lade Vorlesungs- und Übungsvideos direkt aus RWTHmoodle auf dein Gerät herunter."
+  },
+  "downloadButton": {
+	"message": "Herunterladen"
+  },
+  "downloadError": {
+	"message": "Downloads für dieses Video konnten nicht geladen werden."
+  },
+  "noDownloads": {
+	"message": "Für dieses Video steht kein Download zur Verfügung."
+  }
+}
