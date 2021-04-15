@@ -21,26 +21,17 @@ function sortByResolution(videos) {
 	});
 }
 
-function storeAgreement() {
-	document.getElementById("agreement-alert").remove();
-	var d = {};
-	d[agreementKey] = true;
-	chrome.storage.local.set(d, function() {
-	  document.getElementById("extension-video-download-bar").style.display = "block";
-	});
-}
-
-function createDownloadBar(videos) {
+function createDownloadBar(id, videos) {
 	// remove any download bar if it already is present in the dom
-	if (document.contains(document.getElementById("extension-video-download-bar"))) {
-		document.getElementById("extension-video-download-bar").remove();
+	if (document.contains(document.getElementById("extension-video-download-bar-" + id))) {
+		document.getElementById("extension-video-download-bar-" + id).remove();
 	} 
 	if (document.contains(document.getElementById("agreement-alert"))) {
 		document.getElementById("agreement-alert").remove();
 	} 
 	
 	// build the html for our download bar
-	var html = "<div id=\"extension-video-download-bar\"";
+	var html = "<div id=\"extension-video-download-bar-" + id + "\" class=\"extension-video-download-bars\"";
 	if(!accessPermmited) {
 		html += " style=\"display:none\"";
 	}
@@ -56,14 +47,35 @@ function createDownloadBar(videos) {
 	html += "</div></div>";
 	
 	if(!accessPermmited) {
-		html += "<div id=\"agreement-alert\" class=\"alert alert-info\">" + chrome.i18n.getMessage("agreement");
-		html += "<button class=\"btn btn-sm btn-secondary\" id=\"agreement-btn\" \">" + chrome.i18n.getMessage("agreementButton") + "</button></div>";
+		html += "<div class=\"alert alert-info agreement-alerts\">" + chrome.i18n.getMessage("agreement");
+		html += "<button class=\"btn btn-sm btn-secondary\" id=\"agreement-btn-" + id + "\">" + chrome.i18n.getMessage("agreementButton") + "</button></div>";
 	}
 	// add this html just after the h2 in the dom (usually the title of the video)
-	document.getElementsByTagName("h2")[0].insertAdjacentHTML('afterend', html);
-	if(!accessPermmited) {
-		document.getElementById("agreement-btn").addEventListener("click", storeAgreement);
+	var iframes = document.getElementsByTagName("iframe");
+	for(var i = 0; i < iframes.length; i++) {
+		var iframe = iframes[i];
+		if(iframe.src && iframe.src.indexOf(id) >= 0) {
+			iframe.parentElement.parentElement.parentElement.insertAdjacentHTML('beforebegin', html);
+			if(!accessPermmited) {
+				document.getElementById("agreement-btn-" + id).addEventListener("click", function() {
+					var els1 = document.getElementsByClassName("agreement-alerts");
+					for(var j = 0; j < els1.length; j++) {
+						els1[j].remove();
+					}
+					var d = {};
+					d[agreementKey] = true;
+					chrome.storage.local.set(d, function() {
+					  var els = document.getElementsByClassName("extension-video-download-bars");
+					  for(var i = 0; i < els.length; i++) {
+						  els[i].style.display = "block";
+					  }
+					});
+				});
+			}
+			break;
+		}
 	}
+
 }
 
 
@@ -72,15 +84,16 @@ function createDownloadBar(videos) {
 window.addEventListener("message", function(e) {	
 	lectureName = document.getElementsByTagName("h1")[0].innerText;
 	trimmedLectureName = lectureName.replace(/[^a-z0-9]/gmi, " ").replace(/\s+/g, "_").toLowerCase();
-	agreementKey = "rwth.moodle.permission." + trimmedLectureName;
+	agreementKey = "rwth.moodle.extension.permission." + trimmedLectureName;
 	if(e.data.startsWith("DOWNLOADS:")) {
 		// the message is prefixed with "DOWNLOADS:" and followed with a JSON object containing download urls for different video resolutions
-		var suff = e.data.split("DOWNLOADS:")[1];
+		var suff = e.data.split("DOWNLOADS:", 2)[1];
 		if(suff === "ERROR") {
 			document.getElementsByTagName("h2")[0].insertAdjacentHTML('afterend', "<p style=\"color:red;\">" + chrome.i18n.getMessage("downloadError") + "</p>");
 			return;
 		}
-		var videos = JSON.parse(suff);
+		var obj = JSON.parse(suff);
+		var videos = obj.videos;
 		if(videos.length === 0) {
 			document.getElementsByTagName("h2")[0].insertAdjacentHTML('afterend', "<p style=\"color:red;\">" + chrome.i18n.getMessage("noDownloads") + "</p>");
 			return;
@@ -90,7 +103,7 @@ window.addEventListener("message", function(e) {
 		d.push(agreementKey);
 		chrome.storage.local.get(d, function(result) {
 		   accessPermmited = result != {} && result[agreementKey];
-		   createDownloadBar(videos);
+		   createDownloadBar(obj.id, videos);
 		});
 	}
 });

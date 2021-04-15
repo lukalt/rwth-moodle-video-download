@@ -1,8 +1,8 @@
 // this scrip is injected to the iframe which contains the opencast video player
 window.addEventListener("load", function(){
     paella.opencast.getEpisode().then(function(ep) { // wait for the episode to be loaded
+		var id = ep.id;
 		var tracks = ep.mediapackage.media.track;
-		console.log(tracks);
 		var downloads = [];
 		for(var i = 0; i < tracks.length; i++) {
 			if(tracks[i].mimetype !== "video/mp4" || tracks[i].transport == "RTMP") {
@@ -16,7 +16,8 @@ window.addEventListener("load", function(){
 				}
 			}
 		}
-		parent.postMessage("DOWNLOADS:" + JSON.stringify(downloads), "*");
+		var obj = {"id": id, "videos": downloads};
+		parent.postMessage("DOWNLOADS:" + JSON.stringify(obj), "*");
 	}, function(err) {
 		console.log(err);
 		parent.postMessage("DOWNLOADS:ERROR", "*");
