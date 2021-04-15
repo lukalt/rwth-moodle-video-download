@@ -3,7 +3,7 @@
   "description": "__MSG_appDesc__",
   "version": "1.0.0",
   "default_locale": "en",
-  "manifest_version": 3,
+  "manifest_version": 2,
   "icons": {
     "16": "/images/16.png",
     "32": "/images/32.png",
@@ -23,8 +23,5 @@
 		"all_frames":true
 	}
    ],
-   "web_accessible_resources": [{
-		"resources": ["paella_inject.js"],
-		"matches": ["https://engage.streaming.rwth-aachen.de/*"]
-	}]
+   "web_accessible_resources": ["paella_inject.js"]
 }

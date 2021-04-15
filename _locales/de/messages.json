@@ -13,5 +13,11 @@
   },
   "noDownloads": {
 	"message": "Für dieses Video steht kein Download zur Verfügung."
+  },
+  "agreement": {
+	"message": "Dieses Video kann durch die inoffizielle RWTHmoodle Video Download Erweiterung heruntergeladen werden. Bitte bestätige, dass du vom Vortragenden dazu berechtigt bist, das Video herunterzuladen."
+  },
+  "agreementButton": {
+	"message": "Bestätigen"
   }
 }

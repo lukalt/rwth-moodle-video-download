@@ -1,4 +1,9 @@
 
+var lectureName;
+var trimmedLectureName;
+var agreementKey;
+var accessPermmited = false;
+
 function formatSize(bytes) {
 	if(bytes < 1024) {
 		return "1 KiB";
@@ -16,25 +21,58 @@ function sortByResolution(videos) {
 	});
 }
 
+function storeAgreement() {
+	document.getElementById("agreement-alert").remove();
+	var d = {};
+	d[agreementKey] = true;
+	chrome.storage.local.set(d, function() {
+	  document.getElementById("extension-video-download-bar").style.display = "block";
+	});
+}
+
 function createDownloadBar(videos) {
 	// remove any download bar if it already is present in the dom
 	if (document.contains(document.getElementById("extension-video-download-bar"))) {
 		document.getElementById("extension-video-download-bar").remove();
 	} 
+	if (document.contains(document.getElementById("agreement-alert"))) {
+		document.getElementById("agreement-alert").remove();
+	} 
 	
 	// build the html for our download bar
-	var html = "<div id=\"extension-video-download-bar\" class=\"dropdown\"><a class=\"btn btn-secondary dropdown-toggle\" role=\"button\" data-toggle=\"dropdown\">" + chrome.i18n.getMessage("downloadButton") + "</a><div class=\"dropdown-menu\"> ";
+	var html = "<div id=\"extension-video-download-bar\"";
+	if(!accessPermmited) {
+		html += " style=\"display:none\"";
+	}
+	html += " =\"dropdown\"><a class=\"btn btn-secondary dropdown-toggle\" role=\"button\" data-toggle=\"dropdown\">" + chrome.i18n.getMessage("downloadButton") + "</a><div class=\"dropdown-menu\"> ";
 	for(var i = 0; i < videos.length; i++) {
 	  var video = videos[i];
-	  html += "<a class=\"dropdown-item\" title=\"Download " + video.resolution + "p\" href=\"" + video.url + "\" target=\"_blank\" download>" + video.resolution + "p (" + formatSize(video.size_bytes) + ")</a> ";
+	  html += " <a class=\"dropdown-item\" title=\"Download " + video.resolution + "p\" href=\"" + video.url + "\" target=\"_blank\" download>" + video.resolution + "p";
+	  if(video.size_bytes > 0) {
+		html += " (" + formatSize(video.size_bytes) + ")";
+	  }
+	  html += "</a> ";
 	}
 	html += "</div></div>";
 	
+	if(!accessPermmited) {
+		html += "<div id=\"agreement-alert\" class=\"alert alert-info\">" + chrome.i18n.getMessage("agreement");
+		html += "<button class=\"btn btn-sm btn-secondary\" id=\"agreement-btn\" \">" + chrome.i18n.getMessage("agreementButton") + "</button></div>";
+	}
 	// add this html just after the h2 in the dom (usually the title of the video)
 	document.getElementsByTagName("h2")[0].insertAdjacentHTML('afterend', html);
+	if(!accessPermmited) {
+		document.getElementById("agreement-btn").addEventListener("click", storeAgreement);
+	}
 }
+
+
+
 // Wait for the child iFrame to send a message with video urls
-window.addEventListener("message", function(e) {
+window.addEventListener("message", function(e) {	
+	lectureName = document.getElementsByTagName("h1")[0].innerText;
+	trimmedLectureName = lectureName.replace(/[^a-z0-9]/gmi, " ").replace(/\s+/g, "_").toLowerCase();
+	agreementKey = "rwth.moodle.permission." + trimmedLectureName;
 	if(e.data.startsWith("DOWNLOADS:")) {
 		// the message is prefixed with "DOWNLOADS:" and followed with a JSON object containing download urls for different video resolutions
 		var suff = e.data.split("DOWNLOADS:")[1];
@@ -48,6 +86,11 @@ window.addEventListener("message", function(e) {
 			return;
 		}
 		sortByResolution(videos);
-		createDownloadBar(videos);
+		var d = [];
+		d.push(agreementKey);
+		chrome.storage.local.get(d, function(result) {
+		   accessPermmited = result != {} && result[agreementKey];
+		   createDownloadBar(videos);
+		});
 	}
 });

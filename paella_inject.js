@@ -5,7 +5,7 @@ window.addEventListener("load", function(){
 		console.log(tracks);
 		var downloads = [];
 		for(var i = 0; i < tracks.length; i++) {
-			if(tracks[i].mimetype !== "video/mp4") {
+			if(tracks[i].mimetype !== "video/mp4" || tracks[i].transport == "RTMP") {
 				continue;
 			}
 			var tags = tracks[i].tags.tag;

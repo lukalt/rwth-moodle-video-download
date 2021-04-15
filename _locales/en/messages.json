@@ -18,5 +18,13 @@
   "noDownloads": {
 	"message": "No download is available for this video.",
 	"description": "Error message shown when no download is available"
+  },
+  "agreement": {
+	"message": "This video can be downloaded using the unofficial RWTHmoodle video download extension. Please confirm that the lecturer is permitting you to download the video. Your confirmation will be stored for this lecture.",
+	"description": "Message shown when download is available but no confirmation has been submitted yet."
+  },
+  "agreementButton": {
+	"message": "Confirm",
+	"description": "Label of the agreement button"
   }
 }
